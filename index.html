@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2026 경기교육연구 페스타 | 경기중등수학교육연구회 체험관</title>
+  <!-- Tailwind CSS 로드 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Pretendard & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+    .tab-active {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+    .stamp-badge {
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .stamp-earned {
+      transform: scale(1.05) rotate(-3deg);
+      border-color: #10b981;
+      background-color: #ecfdf5;
+    }
+    canvas {
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- 상단 헤더 & 연구회 엠블럼 -->
+  <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <!-- SVG 연구회 수학 엠블럼 (PDF 로고 모티브 반영) -->
+        <div class="w-12 h-12 rounded-full bg-amber-100/10 border-2 border-amber-300/70 flex items-center justify-center shrink-0 shadow-inner">
+          <svg class="w-8 h-8 text-amber-300" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 46 C20 42, 28 44, 32 48 C36 44, 44 42, 52 46 L52 22 C44 18, 36 20, 32 24 C28 20, 20 18, 12 22 Z" stroke-linejoin="round"/>
+            <polygon points="32,10 24,25 40,25" stroke="#38bdf8" stroke-width="2.5"/>
+            <text x="14" y="38" font-size="11" fill="#fcd34d" stroke="none" font-weight="bold">Σ</text>
+            <text x="41" y="38" font-size="11" fill="#fcd34d" stroke="none" font-weight="bold">∞</text>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 text-xs font-bold bg-amber-400 text-slate-950 rounded-full">2026 경기교육연구 페스타</span>
+            <span class="text-xs text-blue-200 font-medium">경기중등수학교육연구회</span>
+          </div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight mt-0.5">교실과 지역, 세계를 잇는 체험수학 부스</h1>
+        </div>
+      </div>
+
+      <!-- 체험 스탬프 현황판 -->
+      <div class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-2xl border border-white/15">
+        <span class="text-xs font-semibold text-blue-100 mr-1 hidden md:inline">체험 스탬프:</span>
+        <div id="stamp-1" class="w-8 h-8 rounded-full border-2 border-dashed border-white/40 flex items-center justify-center text-xs font-bold text-white/60" title="주제1: 안성">1</div>
+        <div id="stamp-2" class="w-8 h-8 rounded-full border-2 border-dashed border-white/40 flex items-center justify-center text-xs font-bold text-white/60" title="주제2: 김포">2</div>
+        <div id="stamp-3" class="w-8 h-8 rounded-full border-2 border-dashed border-white/40 flex items-center justify-center text-xs font-bold text-white/60" title="주제3: 수원">3</div>
+        <div id="stamp-4" class="w-8 h-8 rounded-full border-2 border-dashed border-white/40 flex items-center justify-center text-xs font-bold text-white/60" title="주제4: 국제교류">4</div>
+        <button onclick="openCertificateModal()" id="cert-btn" class="ml-2 px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold transition shadow disabled:opacity-40" disabled>
+          수료증 발급
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 네비게이션 탭 (4대 전시 주제) -->
+  <nav class="bg-white border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <button onclick="switchTab('tab1')" id="btn-tab1" class="tab-active p-3 rounded-2xl text-left transition flex flex-col justify-between border border-transparent">
+          <span class="text-[11px] font-bold uppercase tracking-wider opacity-80">주제 1 · 교실 속 지역</span>
+          <span class="text-sm sm:text-base font-extrabold mt-0.5">안성 지역연계 체험수학</span>
+        </button>
+        <button onclick="switchTab('tab2')" id="btn-tab2" class="bg-slate-100 hover:bg-slate-200/70 text-slate-700 p-3 rounded-2xl text-left transition flex flex-col justify-between border border-slate-200/60">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600">주제 2 · 체험수학의 확장</span>
+          <span class="text-sm sm:text-base font-extrabold mt-0.5">김포 Hybrid 교구 & 코딩</span>
+        </button>
+        <button onclick="switchTab('tab3')" id="btn-tab3" class="bg-slate-100 hover:bg-slate-200/70 text-slate-700 p-3 rounded-2xl text-left transition flex flex-col justify-between border border-slate-200/60">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600">주제 3 · 지역 현장</span>
+          <span class="text-sm sm:text-base font-extrabold mt-0.5">수원 화성 매쓰투어</span>
+        </button>
+        <button onclick="switchTab('tab4')" id="btn-tab4" class="bg-slate-100 hover:bg-slate-200/70 text-slate-700 p-3 rounded-2xl text-left transition flex flex-col justify-between border border-slate-200/60">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-purple-600">주제 4 · 교실 밖 세계</span>
+          <span class="text-sm sm:text-base font-extrabold mt-0.5">동두천양주 · 프랑스 교류</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+    <!-- ==================== [TAB 1] 주제 1: 안성 지역연계 체험 수학 ==================== -->
+    <section id="tab1" class="space-y-6">
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-2">학생주도 수업 및 평가 혁신</span>
+            <h2 class="text-2xl font-black text-slate-900">안성 지역연계 체험 수학의 실제 (중1 ~ 고3)</h2>
+            <p class="text-slate-600 text-sm mt-1">안성의 명소와 특산물, 지역 현안을 교육과정 성취기준과 연결한 학년별 프로젝트입니다.</p>
+          </div>
+          <button onclick="earnStamp(1, '안성 지역연계 체험수학')" class="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition shrink-0">
+            ✓ 주제 1 체험 완료 스탬프 받기
+          </button>
+        </div>
+
+        <!-- 7개 교육과정 연계 카드 그리드 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70">
+            <span class="px-2.5 py-0.5 rounded-lg bg-sky-100 text-sky-800 text-xs font-bold">중1 · 일차방정식 (5차시)</span>
+            <h3 class="font-bold text-slate-900 mt-2">칠곡호수공원 수학 탐정단</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">일차방정식 활용 미션형 웹앱을 통해 공원 속 단서를 해결하고, 학생 결과가 교사 구글시트에 자동 저장되는 에듀테크 수업</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70">
+            <span class="px-2.5 py-0.5 rounded-lg bg-sky-100 text-sky-800 text-xs font-bold">중2 · 일차함수 (6차시)</span>
+            <h3 class="font-bold text-slate-900 mt-2">우리지역 관광 노선 소개하기</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">일차함수 그래프로 안성 버스 관광노선을 직접 설계하고, 수학적 모델링만으로 지역 교통 문제를 해결할 수 있는지 비판적 토의</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70">
+            <span class="px-2.5 py-0.5 rounded-lg bg-sky-100 text-sky-800 text-xs font-bold">중2 · 일차함수 (11차시)</span>
+            <h3 class="font-bold text-slate-900 mt-2">금광호수 하늘전망대 설계</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">전망대 외벽과 경사로를 알지오매스(AlgeoMath) 일차함수로 모델링하고 ‘미니 바우덕이타워’ 건축물 설계</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200">
+            <span class="px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 text-xs font-bold">중3 · 산포도 (10차시)</span>
+            <h3 class="font-bold text-slate-900 mt-2">산포도로 보는 명품 포도의 기준</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">안성 거봉·샤인머스캣 포도알 크기를 실측해 분산과 표준편차를 구하고, 브랜드 매니저가 되어 명품 품질 기준 제안</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70">
+            <span class="px-2.5 py-0.5 rounded-lg bg-violet-100 text-violet-800 text-xs font-bold">고1 · 집합과 명제 (10차시)</span>
+            <h3 class="font-bold text-slate-900 mt-2">집합과 명제로 안성을 해석하다</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">지역신문, 정책자료, 바우덕이 축제 홍보 문구의 논리 구조를 집합과 명제(역·이·대우)로 분석하고 패들렛으로 공유</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70">
+            <span class="px-2.5 py-0.5 rounded-lg bg-violet-100 text-violet-800 text-xs font-bold">고2 · 데이터 과학 & 행렬</span>
+            <h3 class="font-bold text-slate-900 mt-2">지역 신문 TF-IDF 텍스트분석</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">안성지역 신문 헤드라인 데이터를 수집해 단어 빈도-역문서 빈도(TF-IDF) 가중치를 계산하고 워드클라우드로 지역 현안 도출</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 md:col-span-2 lg:col-span-3">
+            <span class="px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">고3 · 확률과 통계 × 한국지리 융합 (8차시)</span>
+            <h3 class="font-bold text-slate-900 mt-2">오버투어리즘 해소 정책 탐구</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">축제 및 관광지 방문객 데이터를 이항분포와 정규분포로 모델링하여 혼잡 발생 확률을 계산하고, 한국지리 공간 분석과 융합해 캔바(Canva) 정책 포스터 제작</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 인터랙티브 체험 부스 1: 중3 산포도 + 고3 정규분포 혼잡도 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 체험 1-A: 중3 명품 포도 산포도 분석기 -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">직접 체험 1-A · 중3 통계</span>
+              <span class="text-xs text-slate-400 font-semibold">브랜드 매니저 미션</span>
+            </div>
+            <h3 class="text-lg font-extrabold text-slate-900">산포도로 보는 안성 명품 포도 판별기</h3>
+            <p class="text-xs text-slate-600 mt-1">포도 송이 내 알갱이 지름(mm)의 <strong>표준편차</strong>를 조절해 품질 균일도를 비교해 보세요.</p>
+
+            <div class="mt-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/60">
+              <div class="flex justify-between text-xs font-bold mb-1">
+                <span>알갱이 크기 편차 조절 (표준편차 σ)</span>
+                <span id="grape-sd-label" class="text-indigo-600">1.2 mm (명품 특등급)</span>
+              </div>
+              <input type="range" id="grape-sd-slider" min="0.5" max="4.5" step="0.1" value="1.2" class="w-full accent-indigo-600 cursor-pointer" oninput="updateGrapeSim()">
+              
+              <!-- 포도알 시각화 캔버스 -->
+              <canvas id="grapeCanvas" class="w-full h-44 bg-white rounded-xl border border-slate-200 mt-3"></canvas>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+            <div class="p-2.5 rounded-xl bg-slate-100">
+              <div class="text-[11px] text-slate-500 font-semibold">평균 지름</div>
+              <div class="text-sm font-black text-slate-800">28.0 mm</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-indigo-50">
+              <div class="text-[11px] text-indigo-600 font-semibold">분산 (σ²)</div>
+              <div id="grape-var-val" class="text-sm font-black text-indigo-900">1.44</div>
+            </div>
+            <div id="grape-grade-box" class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+              <div class="text-[11px] text-emerald-700 font-semibold">품질 등급</div>
+              <div id="grape-grade-val" class="text-sm font-black text-emerald-800">안성맞춤 명품</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 체험 1-B: 고3 오버투어리즘 혼잡 확률 계산기 -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold">직접 체험 1-B · 고3 확통</span>
+              <span class="text-xs text-slate-400 font-semibold">이항분포 → 정규분포 근사</span>
+            </div>
+            <h3 class="text-lg font-extrabold text-slate-900">바우덕이 축제 오버투어리즘 혼잡 확률</h3>
+            <p class="text-xs text-slate-600 mt-1">잠재 관광객 <span class="font-bold">n = 1,000명</span> 중 실제 방문 확률(<span class="font-bold">p</span>)에 따른 수용 한계(650명) 초과 확률을 계산합니다.</p>
+
+            <div class="mt-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/60">
+              <div class="flex justify-between text-xs font-bold mb-1">
+                <span>관광객 방문 확률 (p)</span>
+                <span id="prob-p-label" class="text-amber-700">p = 0.62 (기대 방문객 620명)</span>
+              </div>
+              <input type="range" id="prob-p-slider" min="0.45" max="0.75" step="0.01" value="0.62" class="w-full accent-amber-600 cursor-pointer" oninput="updateOvertourismSim()">
+
+              <canvas id="normalCanvas" class="w-full h-44 bg-white rounded-xl border border-slate-200 mt-3"></canvas>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+            <div class="p-2.5 rounded-xl bg-slate-100">
+              <div class="text-[11px] text-slate-500 font-semibold">정규분포 N(m, σ²)</div>
+              <div id="norm-dist-val" class="text-xs font-black text-slate-800 mt-0.5">N(620, 15.3²)</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-amber-50">
+              <div class="text-[11px] text-amber-700 font-semibold">혼잡 초과 확률 P(X≥650)</div>
+              <div id="norm-prob-val" class="text-sm font-black text-amber-900">2.50%</div>
+            </div>
+            <div id="norm-policy-box" class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+              <div class="text-[11px] text-emerald-700 font-semibold">정책 권고</div>
+              <div id="norm-policy-val" class="text-xs font-black text-emerald-800 mt-0.5">적정 분산 유지</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== [TAB 2] 주제 2: 김포 Hybrid 체험수학 2.0 ==================== -->
+    <section id="tab2" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold mb-2">활동 기반 수학교육의 미래</span>
+            <h2 class="text-2xl font-black text-slate-900">김포 Hybrid 체험수학 2.0 (교구 7종 & 바이브코딩 5선)</h2>
+            <p class="text-slate-600 text-sm mt-1">만지고 조립하는 아날로그 수학교구와 AI 바이브코딩으로 제작한 디지털 웹앱의 하이브리드 융합 사례입니다.</p>
+          </div>
+          <button onclick="earnStamp(2, '김포 Hybrid 체험수학')" class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-sm transition shrink-0">
+            ✓ 주제 2 체험 완료 스탬프 받기
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <!-- 동아리 융합체험한마당 교구 7종 -->
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/50 border border-slate-200">
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs">7종</span>
+              김포 융합체험한마당 수학 교구 7종
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-4">
+              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                <div class="font-bold text-sm text-blue-900">1. 펜토미노 달력</div>
+                <p class="text-xs text-slate-500 mt-0.5">12개 펜토미노 조각으로 매일의 날짜를 맞추는 조합 기하 퍼즐</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                <div class="font-bold text-sm text-blue-900">2. 수막대 (퀴즈네르)</div>
+                <p class="text-xs text-slate-500 mt-0.5">길이와 색깔로 분수, 약수·배수, 대수적 항등식을 직관화</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                <div class="font-bold text-sm text-blue-900">3. 소마큐브</div>
+                <p class="text-xs text-slate-500 mt-0.5">7개의 입체 조각으로 3×3×3 정육면체 및 다양한 입체 구성</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                <div class="font-bold text-sm text-blue-900">4. 오더리 삼각형</div>
+                <p class="text-xs text-slate-500 mt-0.5">정삼각형 분할과 대칭성을 탐구하는 디자인 패턴 교구</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                <div class="font-bold text-sm text-blue-900">5. 스틱밤 (Stick Bomb)</div>
+                <p class="text-xs text-slate-500 mt-0.5">나무 막대의 엇갈림 격자 구조와 탄성 에너지의 연쇄 반응</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                <div class="font-bold text-sm text-blue-900">6. 에셔 도마뱀 큐브</div>
+                <p class="text-xs text-slate-500 mt-0.5">평면 테셀레이션(쪽매맞춤)을 3차원 정육면체로 확장</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs sm:col-span-2">
+                <div class="font-bold text-sm text-blue-900">7. 직교 라틴방진 키캡</div>
+                <p class="text-xs text-slate-500 mt-0.5">오일러의 직교 라틴방진 원리를 기계식 키보드 키캡 배열에 적용</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 바이브코딩 웹앱 5선 -->
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 to-purple-50/60 border border-indigo-200/80">
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs">5선</span>
+              바이브코딩(Vibe Coding) 수학 웹앱 5선
+            </h3>
+            <div class="space-y-2.5 mt-4">
+              <div class="p-3 bg-white rounded-xl border border-indigo-100 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-sm text-indigo-950">① 하노이탑 수열탐험</div>
+                  <p class="text-xs text-slate-500">재귀적 이동과 수열의 귀납적 정의 $a_{n+1} = 2a_n + 1$ 탐구</p>
+                </div>
+                <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-[11px] font-bold rounded-lg">아래 체험 가능</span>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-indigo-100">
+                <div class="font-bold text-sm text-indigo-950">② 오일러의 시계탑</div>
+                <p class="text-xs text-slate-500">합동식(Modular Arithmetic)과 오일러 피 함수의 시계 원리 시각화</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-indigo-100">
+                <div class="font-bold text-sm text-indigo-950">③ 합의 기하학</div>
+                <p class="text-xs text-slate-500">자연수의 거듭제곱의 합($\sum k, \sum k^2, \sum k^3$)을 도형 넓이·부피로 증명</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-indigo-100">
+                <div class="font-bold text-sm text-indigo-950">④ 극한 릴레이</div>
+                <p class="text-xs text-slate-500">수열의 극한과 급수의 수렴·발산을 단계별 릴레이 미션으로 학습</p>
+              </div>
+              <div class="p-3 bg-white rounded-xl border border-indigo-100">
+                <div class="font-bold text-sm text-indigo-950">⑤ 미분 저작권 심판</div>
+                <p class="text-xs text-slate-500">함수의 그래프 개형과 도함수 성질을 판별하는 게임형 탐구 웹앱</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 인터랙티브 체험 부스 2: 하노이탑 수열 탐험 -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">바이브코딩 체험 · 하노이탑 수열탐험</span>
+            <h3 class="text-lg font-extrabold text-slate-900 mt-1">원판을 옮겨 최소 이동 횟수 수열 $a_n = 2^n - 1$ 발견하기</h3>
+            <p class="text-xs text-slate-600">기둥을 차례로 클릭(또는 터치)하여 맨 위 원판을 다른 기둥으로 옮기세요. 큰 원판은 작은 원판 위에 놓을 수 없습니다.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-slate-700">원판 수(n):</label>
+            <select id="hanoi-disk-select" onchange="initHanoi()" class="px-3 py-1.5 rounded-xl border border-slate-300 text-sm font-bold bg-slate-50">
+              <option value="3" selected>3개 (최소 7회)</option>
+              <option value="4">4개 (최소 15회)</option>
+              <option value="5">5개 (최소 31회)</option>
+            </select>
+            <button onclick="initHanoi()" class="px-3 py-1.5 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-700">초기화</button>
+          </div>
+        </div>
+
+        <!-- 하노이탑 게임 보드 -->
+        <div class="grid grid-cols-3 gap-3 sm:gap-6 bg-slate-100 p-4 sm:p-6 rounded-2xl border border-slate-200">
+          <div onclick="clickPeg(0)" id="peg-0" class="cursor-pointer bg-white rounded-2xl p-3 h-52 flex flex-col justify-end items-center relative border-2 border-transparent hover:border-indigo-400 transition">
+            <div class="w-2 h-36 bg-slate-300 rounded-t-full absolute bottom-6"></div>
+            <div id="disks-0" class="w-full flex flex-col items-center z-10 mb-3 gap-1"></div>
+            <span class="text-xs font-extrabold text-slate-500 z-10">기둥 A (출발)</span>
+          </div>
+          <div onclick="clickPeg(1)" id="peg-1" class="cursor-pointer bg-white rounded-2xl p-3 h-52 flex flex-col justify-end items-center relative border-2 border-transparent hover:border-indigo-400 transition">
+            <div class="w-2 h-36 bg-slate-300 rounded-t-full absolute bottom-6"></div>
+            <div id="disks-1" class="w-full flex flex-col items-center z-10 mb-3 gap-1"></div>
+            <span class="text-xs font-extrabold text-slate-500 z-10">기둥 B (보조)</span>
+          </div>
+          <div onclick="clickPeg(2)" id="peg-2" class="cursor-pointer bg-white rounded-2xl p-3 h-52 flex flex-col justify-end items-center relative border-2 border-transparent hover:border-indigo-400 transition">
+            <div class="w-2 h-36 bg-slate-300 rounded-t-full absolute bottom-6"></div>
+            <div id="disks-2" class="w-full flex flex-col items-center z-10 mb-3 gap-1"></div>
+            <span class="text-xs font-extrabold text-slate-500 z-10">기둥 C (목표)</span>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-4 bg-indigo-50/70 px-4 py-3 rounded-2xl border border-indigo-100">
+          <div id="hanoi-status" class="text-sm font-bold text-indigo-950">기둥 A를 선택해 원판을 들어 올리세요.</div>
+          <div class="flex items-center gap-4 text-xs font-extrabold">
+            <span class="text-slate-600">현재 이동: <span id="hanoi-moves" class="text-indigo-700 text-base">0</span>회</span>
+            <span class="text-slate-600">이론적 최소 이동($2^n-1$): <span id="hanoi-min" class="text-emerald-700 text-base">7</span>회</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== [TAB 3] 주제 3: 수원 화성 매쓰투어 ==================== -->
+    <section id="tab3" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-2">지역연계 체험수학의 실제</span>
+            <h2 class="text-2xl font-black text-slate-900">세계문화유산 수원 화성 매쓰투어 4대 미션</h2>
+            <p class="text-slate-600 text-sm mt-1">창룡문과 국궁체험장을 배경으로 기하학, 삼각비, 공간 채우기, 확률을 현장에서 탐구하는 체험 미션입니다.</p>
+          </div>
+          <button onclick="earnStamp(3, '수원 화성 매쓰투어')" class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm transition shrink-0">
+            ✓ 주제 3 체험 완료 스탬프 받기
+          </button>
+        </div>
+
+        <!-- 4대 미션 안내 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200">
+            <span class="text-xs font-black text-emerald-700">MISSION 1</span>
+            <h3 class="font-extrabold text-slate-900 mt-1">창룡문 옹성 탐구</h3>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">성문을 보호하는 반원형 옹성을 기하학적으로 모델링하여 곡선 둘레의 길이와 성벽의 부피를 계산합니다.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200">
+            <span class="text-xs font-black text-emerald-700">MISSION 2</span>
+            <h3 class="font-extrabold text-slate-900 mt-1">창룡문 기둥의 높이</h3>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">직접 자를 대고 잴 수 없는 문루 기둥 높이를 클리노미터(삼각비 tan) 또는 거울의 반사 법칙(닮음비)으로 측정합니다.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200">
+            <span class="text-xs font-black text-emerald-700">MISSION 3</span>
+            <h3 class="font-extrabold text-slate-900 mt-1">기둥 문양 속 원의 배열</h3>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">중심 원 1개를 원 6개가 둘러싸는 평면 밀집 배열과 남은 빈틈 넓이를 구하고, 3차원 구 12개(케플러의 추측) 및 캔 담기 아이디어로 확장합니다.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200">
+            <span class="text-xs font-black text-emerald-700">MISSION 4</span>
+            <h3 class="font-extrabold text-slate-900 mt-1">국궁체험장 확률 미션</h3>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">두 친구가 과녁을 향해 활을 쏠 때 각각의 적중 확률을 바탕으로 둘 다 맞힐 확률, 둘 다 못 맞힐 확률을 탐구합니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 인터랙티브 체험 부스 3: 미션 2(클리노미터) & 미션 4(국궁체험장) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 체험 3-A: 미션 2 창룡문 기둥 높이 클리노미터 시뮬레이터 -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+          <div>
+            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">미션 2 체험 · 삼각비 측정</span>
+            <h3 class="text-lg font-extrabold text-slate-900 mt-2">클리노미터로 창룡문 기둥 높이 구하기</h3>
+            <p class="text-xs text-slate-600 mt-1">기둥으로부터 떨어진 거리($d$)와 올려다본 각도($\theta$)를 조절해 높이를 측정하세요. (눈높이 $1.6\text{m}$ 기준)</p>
+
+            <div class="mt-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/70 space-y-3">
+              <div>
+                <div class="flex justify-between text-xs font-bold">
+                  <span>기둥까지의 수평 거리 (d)</span>
+                  <span id="clino-dist-label" class="text-emerald-700">10.0 m</span>
+                </div>
+                <input type="range" id="clino-dist" min="5" max="20" step="0.5" value="10" class="w-full accent-emerald-600 cursor-pointer" oninput="updateClinoSim()">
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-bold">
+                  <span>클리노미터 올려다본 각 (θ)</span>
+                  <span id="clino-angle-label" class="text-emerald-700">35° (tan 35° ≈ 0.700)</span>
+                </div>
+                <input type="range" id="clino-angle" min="15" max="60" step="1" value="35" class="w-full accent-emerald-600 cursor-pointer" oninput="updateClinoSim()">
+              </div>
+              <canvas id="clinoCanvas" class="w-full h-44 bg-white rounded-xl border border-slate-200"></canvas>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+            <div class="text-xs text-emerald-900 font-semibold">
+              계산식: <span class="font-mono font-bold">h = d × tan(θ) + 1.6m</span>
+            </div>
+            <div class="text-base font-black text-emerald-800">
+              기둥 높이: <span id="clino-height-val">8.60 m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 체험 3-B: 미션 4 국궁체험장 독립사건 확률 시뮬레이터 -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+          <div>
+            <span class="px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold">미션 4 체험 · 확률과 통계</span>
+            <h3 class="text-lg font-extrabold text-slate-900 mt-2">수원 화성 연무대 국궁체험장 적중 확률</h3>
+            <p class="text-xs text-slate-600 mt-1">두 학생 A, B의 명중률을 설정하고 직접 활을 쏘아 이론적 확률과 실험적 빈도를 비교해 보세요.</p>
+
+            <div class="mt-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/70 space-y-3">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="flex justify-between text-xs font-bold">
+                    <span>학생 A 명중률 P(A)</span>
+                    <span id="arch-pa-label" class="text-blue-700">60%</span>
+                  </div>
+                  <input type="range" id="arch-pa" min="10" max="90" step="5" value="60" class="w-full accent-blue-600 cursor-pointer" oninput="updateArcheryTheory()">
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs font-bold">
+                    <span>학생 B 명중률 P(B)</span>
+                    <span id="arch-pb-label" class="text-rose-700">50%</span>
+                  </div>
+                  <input type="range" id="arch-pb" min="10" max="90" step="5" value="50" class="w-full accent-rose-600 cursor-pointer" oninput="updateArcheryTheory()">
+                </div>
+              </div>
+
+              <!-- 과녁 및 화살 결과 시각화 -->
+              <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-around">
+                <div class="text-center">
+                  <div class="text-xs font-bold text-slate-500 mb-1">학생 A 과녁</div>
+                  <div id="target-a" class="w-16 h-16 mx-auto rounded-full border-4 border-blue-500 flex items-center justify-center text-xs font-black text-slate-700 bg-blue-50">대기</div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <button onclick="shootArrows(1)" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold shadow transition">
+                    🏹 1회 동시 발사
+                  </button>
+                  <button onclick="shootArrows(100)" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition">
+                    ⚡ 100회 시뮬레이션
+                  </button>
+                </div>
+                <div class="text-center">
+                  <div class="text-xs font-bold text-slate-500 mb-1">학생 B 과녁</div>
+                  <div id="target-b" class="w-16 h-16 mx-auto rounded-full border-4 border-rose-500 flex items-center justify-center text-xs font-black text-slate-700 bg-rose-50">대기</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+            <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200">
+              <div class="text-[11px] text-emerald-800 font-bold">둘 다 적중 P(A∩B)</div>
+              <div id="arch-both-hit" class="text-sm font-black text-emerald-900">이론 30.0%</div>
+              <div id="arch-exp-hit" class="text-[10px] text-emerald-700">실험 0/0 (0%)</div>
+            </div>
+            <div class="p-2 rounded-xl bg-amber-50 border border-amber-200">
+              <div class="text-[11px] text-amber-800 font-bold">한 명만 적중</div>
+              <div id="arch-one-hit" class="text-sm font-black text-amber-900">이론 50.0%</div>
+              <div id="arch-exp-one" class="text-[10px] text-amber-700">실험 0/0 (0%)</div>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
+              <div class="text-[11px] text-slate-700 font-bold">둘 다 실패 P(Aᶜ∩Bᶜ)</div>
+              <div id="arch-both-miss" class="text-sm font-black text-slate-900">이론 20.0%</div>
+              <div id="arch-exp-miss" class="text-[10px] text-slate-600">실험 0/0 (0%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== [TAB 4] 주제 4: 동두천양주 국제교류 ==================== -->
+    <section id="tab4" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold mb-2">수학으로 연결되는 교실 밖 세계</span>
+            <h2 class="text-2xl font-black text-slate-900">동두천양주 × 프랑스·필리핀·그리스 국제교류 사례</h2>
+            <p class="text-slate-600 text-sm mt-1">언어를 넘어 수학적 기하와 대칭, 문화유산을 매개로 세계 학생들과 소통한 글로벌 체험수학 프로젝트입니다.</p>
+          </div>
+          <button onclick="earnStamp(4, '동두천양주 국제교류')" class="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold shadow-sm transition shrink-0">
+            ✓ 주제 4 체험 완료 스탬프 받기
+          </button>
+        </div>
+
+        <!-- 프랑스 현지 교류 & 온라인 국제교류 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+          <div class="p-4 rounded-2xl bg-purple-50/60 border border-purple-200">
+            <span class="px-2.5 py-0.5 rounded-lg bg-purple-100 text-purple-800 text-xs font-bold">파리 아클리마타시옹 공원</span>
+            <h3 class="font-bold text-slate-900 mt-2">한가위 축제 수학 아틀리에</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">콩드르세 중학교 교사·학생들과 함께 시에르핀스키 삼각형 및 스트링아트 키링 부스를 공동 운영하며 프랙탈과 포락선 기하 체험</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span class="px-2.5 py-0.5 rounded-lg bg-slate-200 text-slate-800 text-xs font-bold">프로방스 중학교 & 밀레 고등학교</span>
+            <h3 class="font-bold text-slate-900 mt-2">위상과 예술이 만나는 융합 수업</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">프로방스중에서 양말목 키링으로 점·선·면 원리 및 종이접기 기하 탐구, 밀레고에서 연극·미술 교과와 수학적 표현 융합</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span class="px-2.5 py-0.5 rounded-lg bg-slate-200 text-slate-800 text-xs font-bold">쥘페리 중 & 콩드르세 중학교</span>
+            <h3 class="font-bold text-slate-900 mt-2">양국 문화유산 속 수학 발표</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">쥘페리중에서 시에르핀스키 열쇠고리 제작 교류, 콩드르세중에서 가르교·홍교의 아치, 석가탑과 루브르 피라미드의 닮음비, 약과의 회전대칭과 원주율 발표</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 md:col-span-2 lg:col-span-3">
+            <span class="px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 text-xs font-bold">실시간 온라인 국제교류 (필리핀 · 그리스)</span>
+            <h3 class="font-bold text-slate-900 mt-1.5">알지오매스(AlgeoMath) 실시간 원주각 탐구 & 컬처박스</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">필리핀 학생들과 알지오매스 공유 캔버스로 원주각의 성질을 실시간 공동 탐구하고, 그리스 학생들의 파르테논 황금비·기하 발표 및 양국 수학 교구 컬처박스 교환</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 인터랙티브 체험 부스 4: 한가위 수학 아틀리에 - 시에르핀스키 삼각형 생성기 -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-extrabold">파리 수학 아틀리에 체험 · 프랙탈 기하</span>
+            <h3 class="text-lg font-extrabold text-slate-900 mt-1">시에르핀스키 삼각형 (Sierpinski Triangle) 키링 도안 설계</h3>
+            <p class="text-xs text-slate-600">단계를 높여 각 정삼각형의 중점을 연결해 가운데 삼각형을 제거할 때, 남는 삼각형의 개수와 넓이 비율 변화를 관찰하세요.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="changeSierpinski(-1)" class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-extrabold">- 이전 단계</button>
+            <span id="sierp-step-badge" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-extrabold">3 단계</span>
+            <button onclick="changeSierpinski(1)" class="px-3 py-2 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 text-xs font-extrabold">+ 다음 단계</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+          <div class="lg:col-span-2 bg-slate-900 rounded-2xl p-4 flex items-center justify-center">
+            <canvas id="sierpinskiCanvas" class="w-full h-64 max-w-md"></canvas>
+          </div>
+
+          <div class="space-y-3">
+            <div class="p-4 rounded-2xl bg-purple-50 border border-purple-200">
+              <div class="text-xs font-bold text-purple-700">색칠된 정삼각형의 개수 ($3^n$)</div>
+              <div id="sierp-count" class="text-2xl font-black text-purple-950 mt-1">27 개</div>
+              <p class="text-[11px] text-purple-700 mt-0.5">매 단계마다 삼각형 수가 3배씩 증가합니다.</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <div class="text-xs font-bold text-slate-600">남은 도형의 넓이 비율 $(3/4)^n$</div>
+              <div id="sierp-area" class="text-2xl font-black text-slate-900 mt-1">42.19%</div>
+              <p class="text-[11px] text-slate-500 mt-0.5">$n \to \infty$ 일 때 넓이는 $0$에 수렴하지만 둘레는 무한대로 발산합니다!</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 font-medium">
+              💡 <strong>부스 팁:</strong> 파리 한가위 축제에서는 3단계~4단계 도안을 레이저 커팅하여 프랑스 학생들과 열쇠고리로 제작했습니다.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 하단 푸터 -->
+  <footer class="bg-slate-900 text-slate-400 py-6 mt-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div class="font-bold text-slate-200">2026 경기교육연구 페스타 · 경기중등수학교육연구회</div>
+      <div>교실 속 지역(안성) · 체험수학의 확장(김포) · 지역 현장(수원) · 교실 밖 세계(동두천양주)</div>
+    </div>
+  </footer>
+
+  <!-- 알림 토스트 메시지 (alert 대체) -->
+  <div id="toast-box" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-3">
+      <span class="w-6 h-6 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-black text-xs">✓</span>
+      <span id="toast-msg" class="text-sm font-bold">체험 스탬프를 획득했습니다!</span>
+    </div>
+  </div>
+
+  <!-- 수료증 모달 -->
+  <div id="cert-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-300 text-center relative">
+      <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-3xl font-black mb-3">🏆</div>
+      <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-extrabold">2026 경기교육연구 페스타</span>
+      <h3 class="text-2xl font-black text-slate-900 mt-2">체험수학 마스터 인증서</h3>
+      <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+        위 참가자는 <strong>경기중등수학교육연구회</strong> 부스의 4대 테마(안성·김포·수원·국제교류) 수학 탐구 미션을 모두 성실히 체험하였기에 이 인증서를 수여합니다.
+      </p>
+      <div class="my-4 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700">
+        획득 스탬프: 4 / 4 완료 (교실·지역·미래·세계 융합)
+      </div>
+      <button onclick="closeCertificateModal()" class="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm transition">
+        확인 및 닫기
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ==================== 전역 상태 및 탭 전환 ====================
+    const earnedStamps = new Set();
+
+    function switchTab(tabId) {
+      const tabs = ['tab1', 'tab2', 'tab3', 'tab4'];
+      tabs.forEach(id => {
+        const section = document.getElementById(id);
+        const btn = document.getElementById('btn-' + id);
+        if (id === tabId) {
+          section.classList.remove('hidden');
+          btn.classList.add('tab-active');
+          btn.classList.remove('bg-slate-100', 'text-slate-700');
+        } else {
+          section.classList.add('hidden');
+          btn.classList.remove('tab-active');
+          btn.classList.add('bg-slate-100', 'text-slate-700');
+        }
+      });
+
+      // 탭 전환 시 해당 탭 내 캔버스 크기 재계산 및 다시 그리기
+      setTimeout(() => {
+        if (tabId === 'tab1') { updateGrapeSim(); updateOvertourismSim(); }
+        if (tabId === 'tab3') { updateClinoSim(); }
+        if (tabId === 'tab4') { drawSierpinski(); }
+      }, 30);
+    }
+
+    function showToast(message) {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-msg').textContent = message;
+      box.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        box.classList.add('translate-y-24', 'opacity-0');
+      }, 2800);
+    }
+
+    function earnStamp(num, title) {
+      if (!earnedStamps.has(num)) {
+        earnedStamps.add(num);
+        const el = document.getElementById('stamp-' + num);
+        el.classList.remove('border-dashed', 'border-white/40', 'text-white/60');
+        el.classList.add('bg-emerald-400', 'border-emerald-200', 'text-slate-950', 'scale-110');
+        el.textContent = '★';
+        showToast(`[스탬프 ${num} 획득] ${title} 체험 완료!`);
+
+        if (earnedStamps.size === 4) {
+          const certBtn = document.getElementById('cert-btn');
+          certBtn.disabled = false;
+          certBtn.classList.add('animate-bounce');
+          setTimeout(() => openCertificateModal(), 800);
+        }
+      } else {
+        showToast(`이미 [${title}] 스탬프를 획득하셨습니다.`);
+      }
+    }
+
+    function openCertificateModal() {
+      const modal = document.getElementById('cert-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeCertificateModal() {
+      const modal = document.getElementById('cert-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // ==================== [체험 1-A] 명품 포도 산포도 시뮬레이터 ====================
+    // 고정된 정규화 편차 샘플 (평균 0, 표준편차 1)
+    const grapeZScores = [-1.4, -0.9, -0.6, -0.3, -0.1, 0.0, 0.2, 0.4, 0.7, 1.0, 1.4, -0.4];
+
+    function updateGrapeSim() {
+      const sd = parseFloat(document.getElementById('grape-sd-slider').value);
+      const variance = (sd * sd).toFixed(2);
+      document.getElementById('grape-var-val').textContent = variance;
+
+      let gradeText = '';
+      let labelDesc = '';
+      const gradeBox = document.getElementById('grape-grade-box');
+      const gradeVal = document.getElementById('grape-grade-val');
+
+      if (sd <= 1.5) {
+        gradeText = '안성맞춤 명품';
+        labelDesc = `${sd.toFixed(1)} mm (균일도 최상)`;
+        gradeBox.className = 'p-2.5 rounded-xl bg-emerald-50 border border-emerald-200';
+        gradeVal.className = 'text-sm font-black text-emerald-800';
+      } else if (sd <= 2.8) {
+        gradeText = '일반 상등급';
+        labelDesc = `${sd.toFixed(1)} mm (크기 약간 불균일)`;
+        gradeBox.className = 'p-2.5 rounded-xl bg-amber-50 border border-amber-200';
+        gradeVal.className = 'text-sm font-black text-amber-800';
+      } else {
+        gradeText = '선별 재분류 필요';
+        labelDesc = `${sd.toFixed(1)} mm (산포도 큼)`;
+        gradeBox.className = 'p-2.5 rounded-xl bg-rose-50 border border-rose-200';
+        gradeVal.className = 'text-sm font-black text-rose-800';
+      }
+
+      document.getElementById('grape-sd-label').textContent = labelDesc;
+      gradeVal.textContent = gradeText;
+
+      const canvas = document.getElementById('grapeCanvas');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0) return;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // 기준선 (평균 28mm)
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(20, h / 2);
+      ctx.lineTo(w - 20, h / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 12개 포도알 그리기
+      const stepX = (w - 50) / (grapeZScores.length - 1);
+      grapeZScores.forEach((z, idx) => {
+        const diameter = Math.max(14, 28 + z * sd * 2.2);
+        const radius = diameter * 0.55;
+        const cx = 25 + idx * stepX;
+        const cy = h / 2 + (idx % 2 === 0 ? -16 : 16);
+
+        const grad = ctx.createRadialGradient(cx - radius * 0.3, cy - radius * 0.3, 2, cx, cy, radius);
+        grad.addColorStop(0, '#a855f7');
+        grad.addColorStop(1, '#4c1d95');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // ==================== [체험 1-B] 오버투어리즘 정규분포 시뮬레이터 ====================
+    // 표준정규분포 누적분포함수 근사 (Abramowitz & Stegun)
+    function normalCDF(z) {
+      const t = 1 / (1 + 0.2316419 * Math.abs(z));
+      const d = 0.3989423 * Math.exp(-z * z / 2);
+      const prob = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+      return z > 0 ? 1 - prob : prob;
+    }
+
+    function updateOvertourismSim() {
+      const p = parseFloat(document.getElementById('prob-p-slider').value);
+      const n = 1000;
+      const mean = n * p;
+      const sd = Math.sqrt(n * p * (1 - p));
+      const threshold = 650;
+
+      document.getElementById('prob-p-label').textContent = `p = ${p.toFixed(2)} (기대 방문객 ${Math.round(mean)}명)`;
+      document.getElementById('norm-dist-val').textContent = `N(${Math.round(mean)}, ${sd.toFixed(1)}²)`;
+
+      const z = (threshold - mean) / sd;
+      const exceedProb = (1 - normalCDF(z)) * 100;
+      document.getElementById('norm-prob-val').textContent = `${exceedProb.toFixed(2)}%`;
+
+      const pBox = document.getElementById('norm-policy-box');
+      const pVal = document.getElementById('norm-policy-val');
+      if (exceedProb < 10) {
+        pBox.className = 'p-2.5 rounded-xl bg-emerald-50 border border-emerald-200';
+        pVal.className = 'text-xs font-black text-emerald-800 mt-0.5';
+        pVal.textContent = '적정 수용 유지';
+      } else if (exceedProb < 50) {
+        pBox.className = 'p-2.5 rounded-xl bg-amber-50 border border-amber-200';
+        pVal.className = 'text-xs font-black text-amber-800 mt-0.5';
+        pVal.textContent = '셔틀버스 증편 권고';
+      } else {
+        pBox.className = 'p-2.5 rounded-xl bg-rose-50 border border-rose-200';
+        pVal.className = 'text-xs font-black text-rose-800 mt-0.5';
+        pVal.textContent = '사전예약제·분산 필수';
+      }
+
+      const canvas = document.getElementById('normalCanvas');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0) return;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const minX = 400, maxX = 800;
+      const toCanvasX = x => ((x - minX) / (maxX - minX)) * (w - 40) + 20;
+
+      // 650명 이상 위험 구역 음영
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.28)';
+      ctx.beginPath();
+      ctx.moveTo(toCanvasX(threshold), h - 22);
+      for (let x = threshold; x <= maxX; x += 2) {
+        const pdf = Math.exp(-0.5 * Math.pow((x - mean) / sd, 2));
+        const y = (h - 22) - pdf * (h - 45);
+        ctx.lineTo(toCanvasX(x), y);
+      }
+      ctx.lineTo(toCanvasX(maxX), h - 22);
+      ctx.closePath();
+      ctx.fill();
+
+      // 정규분포 곡선
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let x = minX; x <= maxX; x += 2) {
+        const pdf = Math.exp(-0.5 * Math.pow((x - mean) / sd, 2));
+        const y = (h - 22) - pdf * (h - 45);
+        if (x === minX) ctx.moveTo(toCanvasX(x), y);
+        else ctx.lineTo(toCanvasX(x), y);
+      }
+      ctx.stroke();
+
+      // 임계선 (650명)
+      const tx = toCanvasX(threshold);
+      ctx.strokeStyle = '#e11d48';
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(tx, 12);
+      ctx.lineTo(tx, h - 22);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#be123c';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('한계 650명', tx + 4, 22);
+    }
+
+    // ==================== [체험 2] 하노이의 탑 수열 탐험 ====================
+    let hanoiPegs = [[], [], []];
+    let selectedPeg = null;
+    let hanoiMoves = 0;
+    let totalDisks = 3;
+
+    const diskColors = [
+      'bg-rose-500',
+      'bg-amber-500',
+      'bg-emerald-500',
+      'bg-sky-500',
+      'bg-indigo-600'
+    ];
+
+    function initHanoi() {
+      totalDisks = parseInt(document.getElementById('hanoi-disk-select').value);
+      hanoiPegs = [[], [], []];
+      for (let i = totalDisks; i >= 1; i--) {
+        hanoiPegs[0].push(i);
+      }
+      selectedPeg = null;
+      hanoiMoves = 0;
+      document.getElementById('hanoi-moves').textContent = '0';
+      document.getElementById('hanoi-min').textContent = Math.pow(2, totalDisks) - 1;
+      document.getElementById('hanoi-status').textContent = '기둥 A를 선택해 맨 위 원판을 들어 올리세요.';
+      renderHanoi();
+    }
+
+    function renderHanoi() {
+      for (let p = 0; p < 3; p++) {
+        const pegEl = document.getElementById('peg-' + p);
+        if (selectedPeg === p) {
+          pegEl.classList.add('border-indigo-600', 'bg-indigo-50/50');
+          pegEl.classList.remove('border-transparent', 'bg-white');
+        } else {
+          pegEl.classList.remove('border-indigo-600', 'bg-indigo-50/50');
+          pegEl.classList.add('border-transparent', 'bg-white');
+        }
+
+        const container = document.getElementById('disks-' + p);
+        container.innerHTML = '';
+        // 위에서부터 렌더링하기 위해 역순 순회
+        [...hanoiPegs[p]].reverse().forEach((diskSize, idx) => {
+          const widthPct = 30 + diskSize * 13;
+          const diskDiv = document.createElement('div');
+          const isTopSelected = (selectedPeg === p && idx === 0);
+          diskDiv.className = `h-6 rounded-lg ${diskColors[diskSize - 1]} text-white text-xs font-black flex items-center justify-center shadow transition-transform ${isTopSelected ? '-translate-y-2 ring-2 ring-indigo-400' : ''}`;
+          diskDiv.style.width = `${widthPct}%`;
+          diskDiv.textContent = diskSize;
+          container.appendChild(diskDiv);
+        });
+      }
+    }
+
+    function clickPeg(pegIdx) {
+      if (selectedPeg === null) {
+        if (hanoiPegs[pegIdx].length === 0) {
+          document.getElementById('hanoi-status').textContent = '비어 있는 기둥입니다. 원판이 있는 기둥을 선택하세요.';
+          return;
+        }
+        selectedPeg = pegIdx;
+        document.getElementById('hanoi-status').textContent = `기둥 ${['A','B','C'][pegIdx]}의 원판을 선택했습니다. 옮길 기둥을 선택하세요.`;
+      } else {
+        if (selectedPeg === pegIdx) {
+          selectedPeg = null;
+          document.getElementById('hanoi-status').textContent = '선택이 취소되었습니다.';
+        } else {
+          const movingDisk = hanoiPegs[selectedPeg][hanoiPegs[selectedPeg].length - 1];
+          const targetTop = hanoiPegs[pegIdx][hanoiPegs[pegIdx].length - 1];
+
+          if (targetTop !== undefined && movingDisk > targetTop) {
+            document.getElementById('hanoi-status').textContent = '⚠️ 규칙 위반: 큰 원판은 작은 원판 위에 올릴 수 없습니다!';
+            selectedPeg = null;
+          } else {
+            hanoiPegs[selectedPeg].pop();
+            hanoiPegs[pegIdx].push(movingDisk);
+            hanoiMoves++;
+            selectedPeg = null;
+            document.getElementById('hanoi-moves').textContent = hanoiMoves;
+
+            if (hanoiPegs[2].length === totalDisks) {
+              const minMoves = Math.pow(2, totalDisks) - 1;
+              document.getElementById('hanoi-status').textContent = `🎉 성공! 총 ${hanoiMoves}회 만에 이동 완료 (이론 최소값: ${minMoves}회)`;
+              showToast(`하노이탑 ${totalDisks}단 완성! (${hanoiMoves}회 이동)`);
+            } else {
+              document.getElementById('hanoi-status').textContent = '다음 이동할 원판이 있는 기둥을 선택하세요.';
+            }
+          }
+        }
+      }
+      renderHanoi();
+    }
+
+    // ==================== [체험 3-A] 창룡문 기둥 높이 클리노미터 ====================
+    function updateClinoSim() {
+      const dist = parseFloat(document.getElementById('clino-dist').value);
+      const angleDeg = parseFloat(document.getElementById('clino-angle').value);
+      const angleRad = (angleDeg * Math.PI) / 180;
+      const tanVal = Math.tan(angleRad);
+      const eyeHeight = 1.6;
+      const totalHeight = dist * tanVal + eyeHeight;
+
+      document.getElementById('clino-dist-label').textContent = `${dist.toFixed(1)} m`;
+      document.getElementById('clino-angle-label').textContent = `${angleDeg}° (tan ${angleDeg}° ≈ ${tanVal.toFixed(3)})`;
+      document.getElementById('clino-height-val').textContent = `${totalHeight.toFixed(2)} m`;
+
+      const canvas = document.getElementById('clinoCanvas');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0) return;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const groundY = h - 20;
+      const pillarX = w - 65;
+      const personX = pillarX - dist * 10;
+
+      // 지면
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(15, groundY);
+      ctx.lineTo(w - 15, groundY);
+      ctx.stroke();
+
+      // 창룡문 기둥
+      const scaleY = 6.5;
+      const pillarTopY = Math.max(18, groundY - totalHeight * scaleY);
+      ctx.fillStyle = '#b91c1c';
+      ctx.fillRect(pillarX - 10, pillarTopY, 20, groundY - pillarTopY);
+      // 지붕 처마 표현
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.moveTo(pillarX - 24, pillarTopY);
+      ctx.lineTo(pillarX + 24, pillarTopY);
+      ctx.lineTo(pillarX + 16, pillarTopY - 10);
+      ctx.lineTo(pillarX - 16, pillarTopY - 10);
+      ctx.closePath();
+      ctx.fill();
+
+      // 관측자
+      const eyeY = groundY - eyeHeight * scaleY;
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(personX, groundY);
+      ctx.lineTo(personX, eyeY);
+      ctx.stroke();
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.arc(personX, eyeY - 4, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 수평 시선 & 올려다본 시선(빗변)
+      ctx.strokeStyle = '#10b981';
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(personX, eyeY);
+      ctx.lineTo(pillarX - 10, eyeY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(personX, eyeY);
+      ctx.lineTo(pillarX - 10, pillarTopY);
+      ctx.stroke();
+
+      // 텍스트 표시
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(`d = ${dist}m`, (personX + pillarX) / 2 - 18, eyeY + 13);
+      ctx.fillStyle = '#d97706';
+      ctx.fillText(`θ=${angleDeg}°`, personX + 14, eyeY - 4);
+    }
+
+    // ==================== [체험 3-B] 국궁체험장 독립사건 확률 ====================
+    let archStats = { total: 0, bothHit: 0, oneHit: 0, bothMiss: 0 };
+
+    function updateArcheryTheory() {
+      const pa = parseInt(document.getElementById('arch-pa').value) / 100;
+      const pb = parseInt(document.getElementById('arch-pb').value) / 100;
+
+      document.getElementById('arch-pa-label').textContent = `${Math.round(pa * 100)}%`;
+      document.getElementById('arch-pb-label').textContent = `${Math.round(pb * 100)}%`;
+
+      const pBothHit = pa * pb * 100;
+      const pBothMiss = (1 - pa) * (1 - pb) * 100;
+      const pOneHit = 100 - pBothHit - pBothMiss;
+
+      document.getElementById('arch-both-hit').textContent = `이론 ${pBothHit.toFixed(1)}%`;
+      document.getElementById('arch-one-hit').textContent = `이론 ${pOneHit.toFixed(1)}%`;
+      document.getElementById('arch-both-miss').textContent = `이론 ${pBothMiss.toFixed(1)}%`;
+
+      // 확률 설정 변경 시 실험 누적 초기화
+      archStats = { total: 0, bothHit: 0, oneHit: 0, bothMiss: 0 };
+      renderArcheryExp();
+    }
+
+    function shootArrows(trials) {
+      const pa = parseInt(document.getElementById('arch-pa').value) / 100;
+      const pb = parseInt(document.getElementById('arch-pb').value) / 100;
+      let lastHitA = false, lastHitB = false;
+
+      for (let i = 0; i < trials; i++) {
+        lastHitA = Math.random() < pa;
+        lastHitB = Math.random() < pb;
+        archStats.total++;
+        if (lastHitA && lastHitB) archStats.bothHit++;
+        else if (!lastHitA && !lastHitB) archStats.bothMiss++;
+        else archStats.oneHit++;
+      }
+
+      const tA = document.getElementById('target-a');
+      const tB = document.getElementById('target-b');
+      tA.textContent = lastHitA ? '🎯 명중!' : '💨 빗나감';
+      tA.className = `w-16 h-16 mx-auto rounded-full border-4 flex items-center justify-center text-xs font-black ${lastHitA ? 'border-emerald-500 bg-emerald-100 text-emerald-900' : 'border-slate-300 bg-slate-100 text-slate-500'}`;
+
+      tB.textContent = lastHitB ? '🎯 명중!' : '💨 빗나감';
+      tB.className = `w-16 h-16 mx-auto rounded-full border-4 flex items-center justify-center text-xs font-black ${lastHitB ? 'border-emerald-500 bg-emerald-100 text-emerald-900' : 'border-slate-300 bg-slate-100 text-slate-500'}`;
+
+      renderArcheryExp();
+    }
+
+    function renderArcheryExp() {
+      const t = archStats.total;
+      const pct = val => t === 0 ? '0.0' : ((val / t) * 100).toFixed(1);
+      document.getElementById('arch-exp-hit').textContent = `실험 ${archStats.bothHit}/${t} (${pct(archStats.bothHit)}%)`;
+      document.getElementById('arch-exp-one').textContent = `실험 ${archStats.oneHit}/${t} (${pct(archStats.oneHit)}%)`;
+      document.getElementById('arch-exp-miss').textContent = `실험 ${archStats.bothMiss}/${t} (${pct(archStats.bothMiss)}%)`;
+    }
+
+    // ==================== [체험 4] 시에르핀스키 삼각형 프랙탈 ====================
+    let sierpLevel = 3;
+
+    function changeSierpinski(delta) {
+      sierpLevel = Math.max(0, Math.min(6, sierpLevel + delta));
+      document.getElementById('sierp-step-badge').textContent = `${sierpLevel} 단계`;
+      const count = Math.pow(3, sierpLevel);
+      const areaPct = Math.pow(0.75, sierpLevel) * 100;
+      document.getElementById('sierp-count').textContent = `${count.toLocaleString()} 개`;
+      document.getElementById('sierp-area').textContent = `${areaPct.toFixed(2)}%`;
+      drawSierpinski();
+    }
+
+    function drawSierpinski() {
+      const canvas = document.getElementById('sierpinskiCanvas');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0) return;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const side = Math.min(w - 30, (h - 24) / (Math.sqrt(3) / 2));
+      const triHeight = side * (Math.sqrt(3) / 2);
+      const startX = w / 2;
+      const startY = (h - triHeight) / 2;
+
+      const p1 = { x: startX, y: startY };
+      const p2 = { x: startX - side / 2, y: startY + triHeight };
+      const p3 = { x: startX + side / 2, y: startY + triHeight };
+
+      ctx.fillStyle = '#c084fc';
+
+      function subdivide(a, b, c, depth) {
+        if (depth === 0) {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.lineTo(c.x, c.y);
+          ctx.closePath();
+          ctx.fill();
+          return;
+        }
+        const ab = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+        const bc = { x: (b.x + c.x) / 2, y: (b.y + c.y) / 2 };
+        const ca = { x: (c.x + a.x) / 2, y: (c.y + a.y) / 2 };
+
+        subdivide(a, ab, ca, depth - 1);
+        subdivide(ab, b, bc, depth - 1);
+        subdivide(ca, bc, c, depth - 1);
+      }
+
+      subdivide(p1, p2, p3, sierpLevel);
+    }
+
+    // 초기화 및 리사이즈 대응
+    window.addEventListener('load', () => {
+      updateGrapeSim();
+      updateOvertourismSim();
+      initHanoi();
+      updateClinoSim();
+      updateArcheryTheory();
+      drawSierpinski();
+    });
+
+    window.addEventListener('resize', () => {
+      updateGrapeSim();
+      updateOvertourismSim();
+      updateClinoSim();
+      drawSierpinski();
+    });
+  </script>
+</body>
+</html>
